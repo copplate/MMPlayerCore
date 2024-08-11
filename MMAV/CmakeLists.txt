@@ -1,0 +1,18 @@
+
+cmake_minimum_required (VERSION 3.8)
+
+#路径应该如何填写：3rdpart和MMAV是同级的，所以在这个cmake里写要先../跳到它的上一级
+include_directories(../3rdpart/ffmpeg/include)
+
+
+#第一个参数MMAV，说明最后生成库的名字叫MMAV
+add_library(
+        MMAV
+        MMAV.h
+        MMAVReader.cpp
+        MMAVPacket.cpp
+ "MMAVPacketPrivate.h" "MMAVReaderPrivate.h")
+
+
+
+
