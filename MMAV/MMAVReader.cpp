@@ -2,6 +2,9 @@
 
 #include "MMAVPacketPrivate.h"
 #include "MMAVReaderPrivate.h"
+#include "MMAVDecoderPrivate.h"
+#include "MMAVStreamPrivate.h"
+
 
 MMAVReader::MMAVReader() {
 	imp = new MMAVReaderPrivate();
@@ -33,6 +36,22 @@ int MMAVReader::Open(const char* path) {
 	}
 	return ret;
 }
+
+int MMAVReader::GetStreamCount()
+{
+	return imp->formatCtx->nb_streams;
+}
+
+int MMAVReader::GetStream(MMAVStream* avStream, int streamId)
+{
+	AVStream* ffmpegStream = imp->formatCtx->streams[streamId];
+	avStream->streamIndex = ffmpegStream->index;
+	avcodec_parameters_copy(avStream->imp->codecpar, ffmpegStream->codecpar);
+	
+	
+	return 0;
+}
+
 int MMAVReader::Close() {
 	if (imp->formatCtx == nullptr) {//防止意外，做一层防护
 		return -1;//直接返回一个失败
