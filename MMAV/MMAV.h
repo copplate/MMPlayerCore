@@ -15,7 +15,7 @@ public:
 	MMAVPacket();//构造方法
 	~MMAVPacket();//析构方法
 
-
+	int GetIndex();
 public:
 	MMAVPacketPrivate* imp = nullptr;
 };
@@ -27,6 +27,7 @@ public:
 	MMAVFrame();
 	~MMAVFrame();
 
+	int VideoPrint();
 public:
 	MMAVFramePrivate* imp = nullptr;
 };
@@ -46,6 +47,10 @@ public:
 	int Open函数可能会拿出来很多stream，要多传一个streamId
 	*/
 	int GetStream(MMAVStream * stream,int streamId);
+
+	int GetVideoStreamIndex();
+	int GetAudioStreamIndex();
+
 
 	int Close();//既然有open，就要有close
 
@@ -84,6 +89,8 @@ public:
 	int SendPacket(MMAVPacket * pkt);
 
 	int RecvFrame(MMAVFrame * frame);
+
+	int Close();
 private:
 	MMAVDecoderPrivate* imp = nullptr;
 };

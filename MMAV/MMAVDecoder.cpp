@@ -39,8 +39,15 @@ int MMAVDecoder::Init(MMAVStream* stream)
 
 int MMAVDecoder::SendPacket(MMAVPacket* pkt)
 {
-	//解码前的数据叫AVPacket，经过解码器解码的数据叫AVFrame
-	int ret = avcodec_send_packet(imp->codecContext,pkt->imp->pkt);
+	int ret = 0;
+	if (pkt == nullptr) {
+		ret = avcodec_send_packet(imp->codecContext, nullptr);
+	}
+	else {
+		//解码前的数据叫AVPacket，经过解码器解码的数据叫AVFrame
+		ret = avcodec_send_packet(imp->codecContext, pkt->imp->pkt);
+	}
+	
 	return ret;
 }
 
@@ -48,4 +55,9 @@ int MMAVDecoder::RecvFrame(MMAVFrame* frame)
 {
 	int ret = avcodec_receive_frame(imp->codecContext,frame->imp->frame);
 	return ret;
+}
+
+int MMAVDecoder::Close()
+{
+	return avcodec_close(imp->codecContext);
 }

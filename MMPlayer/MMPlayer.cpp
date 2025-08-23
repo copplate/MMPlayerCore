@@ -5,6 +5,7 @@
 #include <thread>
 #include "MMThread/MMThread.h"
 #include <chrono>
+#include <vector>
 
 using namespace std;
 
@@ -79,16 +80,85 @@ int main() {
 		printf("Open File Fail!!!");
 		return -1;
 	}
+
+	int videoStreamIndex = reader.GetVideoStreamIndex();
+	int audioStreamIndex = reader.GetAudioStreamIndex();
+	printf("videoStreamIndex:%d\n", videoStreamIndex);
+	printf("audioStreamIndex:%d\n", audioStreamIndex);
+
+	std::vector<MMAVDecoder*> decoderList;
+
+	int streamCount = reader.GetStreamCount();
+	for (int i = 0;i < streamCount;i++) {
+		MMAVStream avStream;
+		reader.GetStream(&avStream,i);
+		printf("StreamIndex:%d\n", avStream.streamIndex);
+
+		//在avStream产生之后，要根据avStream初始化编码器
+		MMAVDecoder* decoder = new MMAVDecoder();
+		int ret = decoder->Init(&avStream);
+		if (ret) {
+			printf("Init decoder fail\n");
+		}
+		decoderList.push_back(decoder);
+	}
+
 	while (1) {//中间过程用一个死循环读取
 		MMAVPacket pkt;
 		ret = reader.Read(&pkt);
 		if (ret) {//只要返回值不等于0，说明有问题，就应该break出去
+			//已经到文件末尾读不到数据，就会break，但此时decoder里可能还有数据
 			break;
 		}
-		cout << "Read Packet Success!!" << endl;
+		//cout << "Read Packet Success!!" << endl;
+
+		int streamIndex = pkt.GetIndex();//先确定属于哪个stream
+		//MMAVPacket拿到的streamIndex要和从MMAVStream中拿到的streamIndex相匹配，这里因为是demo就简写了
+		MMAVDecoder* decoder = decoderList[streamIndex];
+		ret = decoder->SendPacket(&pkt);
+		if (ret) {//出问题跳过这一帧，解码下一帧
+			continue;
+		}
+		while (1) {
+			MMAVFrame frame;
+			ret = decoder->RecvFrame(&frame);
+			if (ret) {
+				break;
+			}
+			//Recv Success
+			if (streamIndex == videoStreamIndex) {
+				frame.VideoPrint();
+			}
+			if (streamIndex == audioStreamIndex) {
+
+			}
+			
+		}
+	}
+
+	for (int i = 0;i < decoderList.size();i++) {
+		MMAVDecoder* decoder = decoderList[i];
+		//传nullptr是告诉解码器，我现在没有帧了，把你缓存的帧给我吐出来
+		ret = decoder->SendPacket(nullptr);
+		while (1) {
+			MMAVFrame frame;
+			ret = decoder->RecvFrame(&frame);
+			if (ret) {
+				break;
+			}
+			//Recv Success
+			//todo:对解码后的数据frame作进一步处理
+		}
 	}
 
 	reader.Close();//在最后，把它close掉
+	for (int i = 0;i < decoderList.size();i++) {
+		MMAVDecoder* decoder = decoderList[i];
+		decoder->Close();
+		delete decoder;
+	}
+	decoderList.clear();
+
 	return 0;
 }
 

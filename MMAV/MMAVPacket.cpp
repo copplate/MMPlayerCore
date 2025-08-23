@@ -17,3 +17,8 @@ MMAVPacket::~MMAVPacket() {
 	}
 	
 }
+
+int MMAVPacket::GetIndex()
+{
+	return imp->pkt->stream_index;
+}

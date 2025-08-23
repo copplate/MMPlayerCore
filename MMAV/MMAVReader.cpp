@@ -52,6 +52,16 @@ int MMAVReader::GetStream(MMAVStream* avStream, int streamId)
 	return 0;
 }
 
+int MMAVReader::GetVideoStreamIndex()
+{
+	return av_find_best_stream(imp->formatCtx,AVMediaType::AVMEDIA_TYPE_VIDEO,-1,-1,NULL,NULL);
+}
+
+int MMAVReader::GetAudioStreamIndex()
+{
+	return av_find_best_stream(imp->formatCtx, AVMediaType::AVMEDIA_TYPE_AUDIO, -1, -1, NULL, NULL);
+}
+
 int MMAVReader::Close() {
 	if (imp->formatCtx == nullptr) {//防止意外，做一层防护
 		return -1;//直接返回一个失败
