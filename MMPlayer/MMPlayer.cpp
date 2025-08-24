@@ -75,7 +75,8 @@ int main_thread()//把之前的main函数做一个重命名，再写一个新的
 #include "MMAV/MMAV.h"
 int main() {
 	MMAVReader reader;
-	int ret = reader.Open("H://2403161.mp4");
+	//int ret = reader.Open("H://2403161.mp4");
+	int ret = reader.Open("H://250824.mp4");
 	if (ret) {//如果出现错误
 		printf("Open File Fail!!!");
 		return -1;
@@ -103,6 +104,8 @@ int main() {
 		decoderList.push_back(decoder);
 	}
 
+	FILE* f = fopen("H://demo_video2.yuv","wb");
+
 	while (1) {//中间过程用一个死循环读取
 		MMAVPacket pkt;
 		ret = reader.Read(&pkt);
@@ -128,6 +131,26 @@ int main() {
 			//Recv Success
 			if (streamIndex == videoStreamIndex) {
 				frame.VideoPrint();
+
+				int width = frame.GetW();
+				int height = frame.GetH();
+
+				unsigned char* y = (unsigned char*)malloc(width * height);
+				unsigned char* u = (unsigned char*)malloc(width / 2 * height / 2);
+				unsigned char* v = (unsigned char*)malloc(width / 2 * height / 2);
+
+				frame.GetY(y);
+				frame.GetU(u);
+				frame.GetV(v);
+
+				fwrite(y, width * height, 1, f);
+				fwrite(u, width / 2 * height / 2, 1, f);
+				fwrite(v, width / 2 * height / 2, 1, f);
+
+				free(y);
+				free(u);
+				free(v);
+
 			}
 			if (streamIndex == audioStreamIndex) {
 
@@ -158,6 +181,8 @@ int main() {
 		delete decoder;
 	}
 	decoderList.clear();
+
+	fclose(f);
 
 	return 0;
 }

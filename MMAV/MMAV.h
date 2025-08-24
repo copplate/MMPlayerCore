@@ -28,6 +28,18 @@ public:
 	~MMAVFrame();
 
 	int VideoPrint();
+
+	//获取图像的宽高
+	int GetW();
+	int GetH();
+
+	//直接传一个外部分配好的buffer进来,然后把Y分量拷贝到这个buffer上
+	int GetY(unsigned char * y);
+	//获取U分量
+	int GetU(unsigned char* u);
+	//获取V分量
+	int GetV(unsigned char* v);
+
 public:
 	MMAVFramePrivate* imp = nullptr;
 };
