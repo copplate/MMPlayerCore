@@ -130,7 +130,7 @@ int main() {
 			}
 			//Recv Success
 			if (streamIndex == videoStreamIndex) {
-				frame.VideoPrint();
+				//frame.VideoPrint();
 
 				int width = frame.GetW();
 				int height = frame.GetH();
@@ -153,7 +153,7 @@ int main() {
 
 			}
 			if (streamIndex == audioStreamIndex) {
-
+				frame.AudioPrint();
 			}
 			
 		}

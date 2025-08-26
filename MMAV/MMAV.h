@@ -28,6 +28,7 @@ public:
 	~MMAVFrame();
 
 	int VideoPrint();
+	int AudioPrint();
 
 	//获取图像的宽高
 	int GetW();

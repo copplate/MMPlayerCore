@@ -46,6 +46,27 @@ int MMAVFrame::VideoPrint()
 	return 0;
 }
 
+int MMAVFrame::AudioPrint()
+{
+	int channel = imp->frame->channels;
+	printf("Channel:%d\n", channel);
+	printf("nb_samples:%d\n", imp->frame->nb_samples);
+	printf("sample_rate:%d\n", imp->frame->sample_rate);
+
+	AVSampleFormat format = (AVSampleFormat)(imp->frame->format);
+
+	char* str = (char*)malloc(128);
+	str = av_get_sample_fmt_string(str,128,format);
+	printf("Sample Format:%s\n", str);
+	free(str);
+
+	//linesize在音频当中依然有效
+	for (int i = 0;i < AV_NUM_DATA_POINTERS;i++) {
+		printf("Linesize[%d] : %d\n", i, imp->frame->linesize[i]);
+	}
+	return 0;
+}
+
 int MMAVFrame::GetW()
 {
 	return imp->frame->width;
