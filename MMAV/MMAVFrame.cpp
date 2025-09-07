@@ -50,14 +50,14 @@ int MMAVFrame::AudioPrint()
 {
 	int channel = imp->frame->channels;
 	printf("Channel:%d\n", channel);
-	printf("nb_samples:%d\n", imp->frame->nb_samples);
-	printf("sample_rate:%d\n", imp->frame->sample_rate);
+	printf("nb_samples:%d\n", imp->frame->nb_samples);//一个音频帧中有多少个采样
+	printf("sample_rate:%d\n", imp->frame->sample_rate);//采样率，每一秒采样多少次
 
 	AVSampleFormat format = (AVSampleFormat)(imp->frame->format);
 
 	char* str = (char*)malloc(128);
 	str = av_get_sample_fmt_string(str,128,format);
-	printf("Sample Format:%s\n", str);
+	printf("Sample Format:%s\n", str);//音频格式
 	free(str);
 
 	//linesize在音频当中依然有效

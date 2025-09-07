@@ -73,7 +73,13 @@ int main_thread()//把之前的main函数做一个重命名，再写一个新的
 }
 
 #include "MMAV/MMAV.h"
+#include "MMQueue/MMQueue.h"
+
 int main() {
+	/*  这里写的是<MMAVPacket>，但实际上存的是MMAVPacket的一个指针，
+		就是为了防止拷贝时出错，所以干脆不拷贝
+	*/
+	MMQueue<MMAVPacket> packetQueue;
 	MMAVReader reader;
 	//int ret = reader.Open("H://2403161.mp4");
 	int ret = reader.Open("H://250824.mp4");
@@ -107,18 +113,24 @@ int main() {
 	FILE* f = fopen("H://demo_video2.yuv","wb");
 
 	while (1) {//中间过程用一个死循环读取
-		MMAVPacket pkt;
-		ret = reader.Read(&pkt);
+		//MMAVPacket pkt;
+		/*  原先的 MMAVPacket pkt; ，是直接声明的，并不是new出来的对象，
+		这种的生命周期，就是到while循环结束
+		*/
+		MMAVPacket* pkt = new MMAVPacket();
+
+		ret = reader.Read(pkt);
 		if (ret) {//只要返回值不等于0，说明有问题，就应该break出去
 			//已经到文件末尾读不到数据，就会break，但此时decoder里可能还有数据
 			break;
 		}
 		//cout << "Read Packet Success!!" << endl;
+		packetQueue.Push(pkt);
 
-		int streamIndex = pkt.GetIndex();//先确定属于哪个stream
+		int streamIndex = pkt->GetIndex();//先确定属于哪个stream
 		//MMAVPacket拿到的streamIndex要和从MMAVStream中拿到的streamIndex相匹配，这里因为是demo就简写了
 		MMAVDecoder* decoder = decoderList[streamIndex];
-		ret = decoder->SendPacket(&pkt);
+		ret = decoder->SendPacket(pkt);
 		if (ret) {//出问题跳过这一帧，解码下一帧
 			continue;
 		}
@@ -171,6 +183,16 @@ int main() {
 			}
 			//Recv Success
 			//todo:对解码后的数据frame作进一步处理
+		}
+	}
+
+	while (packetQueue.Size() > 0) {
+		MMAVPacket* pkt = nullptr;
+		packetQueue.Pop(&pkt);
+		printf("Packet Size():%d\n", packetQueue.Size());
+
+		if (pkt != nullptr) {
+			delete pkt;
 		}
 	}
 
