@@ -2,6 +2,7 @@
 
 //先不实现自己的容器，先用std库提供的queue
 #include <queue>
+#include <mutex>
 
 /*
 MMQueue<MMAVFrame> queue
@@ -12,6 +13,7 @@ MMQueue<MMAVFrame> queue
 //2、为什么不直接用std提供的队列，因为不是线程安全的，
 //在我们自己的队列中，要加上线程锁，然后就可以多线程修改队列，
 //因为写播放器的过程中，读和解码都不是在一个线程里
+//3、以后会大量的用到有锁队列，用来缓存Packet或Frame
 template<typename T>
 /*  1、MMQueue是在std的队列上又封装了一层，用起来更方便
 	2、因为用了template，要直接在头文件写函数的实现，
@@ -29,24 +31,32 @@ public:
 
 	~MMQueue()
 	{
+		//进入Pop函数后，自动上锁，在函数退出时，自动把锁解掉
+		std::lock_guard<std::mutex> lck(mut);
 		while (Size() > 0) {//清空队列
-			T* t = nullptr;
-			Pop(&t);
+			/*T* t = nullptr;
+			Pop(&t);*/
+			queue.pop();
 		}
 	}
 
 	/*  参数是想要塞的类型的指针  */
 	int Push(T * t){
+		//进入Pop函数后，自动上锁，在函数退出时，自动把锁解掉
+		std::lock_guard<std::mutex> lck(mut);
 		queue.push(t);//放入队列的头位置
 		return 0;
 	}
 
 	/*  参数是指针的指针  */
 	int Pop(T * * t){
+		//进入Pop函数后，自动上锁，在函数退出时，自动把锁解掉
+		std::lock_guard<std::mutex> lck(mut);
 		int size = Size();
 		if (size > 0) {
 			*t = queue.front();
 			queue.pop();
+
 			return 0;
 		}
 		return -1;
@@ -70,6 +80,8 @@ private:
 		3、当然也有一些问题，一旦把MMAVFrame插入到queue中，MMAVFrame的生命周期就完全托管给了queue，
 	*/
 	std::queue<T*> queue;
+	std::mutex mut;//互斥锁，无法解决多次加锁的问题
+	//std::recursive_mutex mut;//递归锁，允许在同一个线程里多次加锁和多次解锁，但是不推荐大规模使用
 
 
 
