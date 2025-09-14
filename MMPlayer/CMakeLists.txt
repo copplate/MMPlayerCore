@@ -10,7 +10,9 @@ link_directories(../3rdpart/ffmpeg/lib)
 #使用这个库，还要引用一堆ffmpeg的东西。
 
 # 将源代码添加到此项目的可执行文件。
-add_executable (MMPlayer "MMPlayer.cpp" "MMPlayer.h")
+#add_executable (MMPlayer"MMPlayerOld.cpp"" "MMPlayer.h")
+#生成一个库
+add_library (MMPlayer "MMPlayer.cpp" "MMPlayer.h" "MMPlayerReaderThread.cpp")
 
 #引进来MMThread.cpp生成的静态库
 #由于它们都在一个工程里，所以没有必要配置路径，它可以自己找到
