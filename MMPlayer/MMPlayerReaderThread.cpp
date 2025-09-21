@@ -22,9 +22,29 @@ void MMPlayerReaderThread::run()
 	int videoStreamIndex = reader.GetVideoStreamIndex();
 	int audioStreamIndex = reader.GetAudioStreamIndex();
 
-	//TODO 拿到流之后要初始化一下解码器
+	//拿到流之后要初始化一下解码器
+	//有两个streamIndex，启动两个decoder线程
+	MMPlayerDecoderThread* videoDecoderThread = new MMPlayerDecoderThread();
+	MMPlayerDecoderThread* audioDecoderThread = new MMPlayerDecoderThread();
+
+	MMAVStream videoStream;
+	reader.GetStream(&videoStream,videoStreamIndex);
+	videoDecoderThread->Init(&videoStream);
+
+	MMAVStream audioStream;
+	reader.GetStream(&audioStream, audioStreamIndex);
+	audioDecoderThread->Init(&audioStream);
+
+	videoDecoderThread->start();
+	audioDecoderThread->start();
+
 
 	while (!stopFlag) {
+		//处理解码线程可能比较慢的情况
+		if (videoDecoderThread->GetPacketQueueSize() > 5 && audioDecoderThread->GetPacketQueueSize() > 5) {
+			continue;
+		}
+
 		MMAVPacket* pkt = new MMAVPacket();//不希望循环一次之后，pkt就被释放掉，所以用new的形式
 		int ret = reader.Read(pkt);
 		if (ret) {
@@ -33,13 +53,24 @@ void MMPlayerReaderThread::run()
 			break;//Read出错了，或者已经读到了文件流的末尾
 		}
 
+		if (pkt->GetIndex() == videoStreamIndex) {//区分packet是音频流还是视频流，然后放到对应的视频流或音频流的解码器中
+			videoDecoderThread->PutPacket(pkt);
+		}
+
+		if (pkt->GetIndex() == audioStreamIndex) {
+			audioDecoderThread->PutPacket(pkt);
+		}
+
 		//将Packet放入缓存
 
 		printf("Read Packet Success\n");
-		delete pkt;
-		pkt = nullptr;
+		//delete pkt;
+		//pkt = nullptr;
 
 	}
+
+	videoDecoderThread->Stop();//视频播到最后了，停止这两个线程
+	audioDecoderThread->Stop();
 
 	reader.Close();
 
