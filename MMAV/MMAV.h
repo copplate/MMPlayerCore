@@ -41,6 +41,8 @@ public:
 	//获取V分量
 	int GetV(unsigned char* v);
 
+	long long GetPts();
+
 public:
 	MMAVFramePrivate* imp = nullptr;
 };
@@ -86,6 +88,8 @@ public:
 	~MMAVStream();
 public:
 	int streamIndex = -1;
+	int timebaseNum = 0;
+	int timebaseDen = 0;
 	MMAVStreamPrivate* imp = nullptr;
 };
 
@@ -106,4 +110,13 @@ public:
 	int Close();
 private:
 	MMAVDecoderPrivate* imp = nullptr;
+
+	int timebaseNum = 0;
+	int timebaseDen = 0;
+};
+
+class MMAVTime
+{
+public:
+	static long long GetTime();//时间戳用一个long long类型
 };

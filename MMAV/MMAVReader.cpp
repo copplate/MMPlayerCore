@@ -45,6 +45,12 @@ int MMAVReader::GetStreamCount()
 int MMAVReader::GetStream(MMAVStream* avStream, int streamId)
 {
 	AVStream* ffmpegStream = imp->formatCtx->streams[streamId];
+	//ffmpegStream->time_base
+	printf("Timebase num:%d\n", ffmpegStream->time_base.num);
+	printf("Timebase num:%d\n", ffmpegStream->time_base.den);
+
+	avStream->timebaseNum = ffmpegStream->time_base.num;
+	avStream->timebaseDen = ffmpegStream->time_base.den;
 	avStream->streamIndex = ffmpegStream->index;
 	avcodec_parameters_copy(avStream->imp->codecpar, ffmpegStream->codecpar);
 	

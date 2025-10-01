@@ -25,6 +25,9 @@ MMAVDecoder::~MMAVDecoder() {
 
 int MMAVDecoder::Init(MMAVStream* stream)
 {
+	timebaseNum = stream->timebaseNum;
+	timebaseDen = stream->timebaseDen;
+
 	avcodec_parameters_to_context(imp->codecContext, stream->imp->codecpar);
 	AVCodec * avcodec = avcodec_find_decoder(imp->codecContext->codec_id);
 	//解码时，想解这一路流用什么参数都是视频规定好的，第三个参数AVDictionary **options 直接传nullptr
@@ -54,6 +57,10 @@ int MMAVDecoder::SendPacket(MMAVPacket* pkt)
 int MMAVDecoder::RecvFrame(MMAVFrame* frame)
 {
 	int ret = avcodec_receive_frame(imp->codecContext,frame->imp->frame);
+	if (ret) {
+		//将秒级时间戳计算并且赋值
+		frame->imp->ptsSec = frame->imp->frame->pts * 1.0 * timebaseNum / timebaseDen;//frame->imp->frame->pts * 1.0是为了让pts变成double类型
+	}
 	return ret;
 }
 

@@ -11,11 +11,19 @@ MMPlayer::~MMPlayer()
 
 int MMPlayer::Open()//打开这个流
 {
+	/*
 	if (readerThread == nullptr) {
 		readerThread = new MMPlayerReaderThread(path);
 
 		//启动线程
 		readerThread->start();
+		return 0;
+	}*/
+
+	if (playerCtr == nullptr) {
+		playerCtr = new MMPlayerCtr();
+
+		playerCtr->start();
 		return 0;
 	}
 	
@@ -23,10 +31,16 @@ int MMPlayer::Open()//打开这个流
 }
 int MMPlayer::Stop()//停止这个流
 {
+	/*
 	if (readerThread != nullptr) {
 		readerThread->Stop();
 		delete readerThread;
 		readerThread = nullptr;
+	}*/
+	if (playerCtr != nullptr) {
+		playerCtr->Stop();
+		delete playerCtr;
+		playerCtr = nullptr;
 	}
 	
 	return 0;

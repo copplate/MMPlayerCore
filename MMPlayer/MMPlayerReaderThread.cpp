@@ -2,9 +2,10 @@
 #include "MMAV/MMAV.h"
 
 
-MMPlayerReaderThread::MMPlayerReaderThread(std::string _path)
+MMPlayerReaderThread::MMPlayerReaderThread(std::string _path, MMPlayerCtr* _playerCtr)
 {
 	path = _path;
+	playerCtr = _playerCtr;
 }
 MMPlayerReaderThread::~MMPlayerReaderThread()
 {
@@ -24,8 +25,8 @@ void MMPlayerReaderThread::run()
 
 	//拿到流之后要初始化一下解码器
 	//有两个streamIndex，启动两个decoder线程
-	MMPlayerDecoderThread* videoDecoderThread = new MMPlayerDecoderThread();
-	MMPlayerDecoderThread* audioDecoderThread = new MMPlayerDecoderThread();
+	MMPlayerDecoderThread* videoDecoderThread = new MMPlayerDecoderThread(playerCtr,MMDecoderType::MMDECODER_TYPE_VIDEO);
+	MMPlayerDecoderThread* audioDecoderThread = new MMPlayerDecoderThread(playerCtr,MMDecoderType::MMDECODER_TYPE_AUDIO);
 
 	MMAVStream videoStream;
 	reader.GetStream(&videoStream,videoStreamIndex);
@@ -63,7 +64,7 @@ void MMPlayerReaderThread::run()
 
 		//将Packet放入缓存
 
-		printf("Read Packet Success\n");
+		//printf("Read Packet Success\n");
 		//delete pkt;
 		//pkt = nullptr;
 

@@ -116,3 +116,11 @@ int MMAVFrame::GetV(unsigned char* v)
 
 	return 0;
 }
+
+long long MMAVFrame::GetPts()
+{
+	//imp->frame->pts;
+	printf("Pts: %lld\n", imp->frame->pts);
+	printf("PtsSec: %f\n", imp->ptsSec);
+	return (long long)(imp->ptsSec * 1000);
+}

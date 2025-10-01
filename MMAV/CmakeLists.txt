@@ -14,7 +14,7 @@ add_library(
         MMAVDecoder.cpp
         MMAVStream.cpp
         MMAVFrame.cpp
- "MMAVPacketPrivate.h" "MMAVReaderPrivate.h" "MMAVStreamPrivate.h" "MMAVFramePrivate.h")
+ "MMAVPacketPrivate.h" "MMAVReaderPrivate.h" "MMAVStreamPrivate.h" "MMAVFramePrivate.h" "MMAVTime.cpp")
 
 
 
