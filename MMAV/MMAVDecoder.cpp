@@ -57,7 +57,7 @@ int MMAVDecoder::SendPacket(MMAVPacket* pkt)
 int MMAVDecoder::RecvFrame(MMAVFrame* frame)
 {
 	int ret = avcodec_receive_frame(imp->codecContext,frame->imp->frame);
-	if (ret) {
+	if (!ret) {
 		//将秒级时间戳计算并且赋值
 		frame->imp->ptsSec = frame->imp->frame->pts * 1.0 * timebaseNum / timebaseDen;//frame->imp->frame->pts * 1.0是为了让pts变成double类型
 	}
