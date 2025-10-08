@@ -44,7 +44,7 @@ void MMPlayerCtr::run()
 		if (videoFrame != nullptr) {//当拿到这一帧
 			//如果frame_pts <= d_time , 这帧视频应该立即播放出来
 			if (videoFrame->GetPts() <= dTime) {
-				printf("Video Frame\n");
+				printf("Video Frame:%lld\n", videoFrame->GetPts());
 				delete videoFrame;
 				videoFrame = nullptr;
 			}
@@ -61,7 +61,7 @@ void MMPlayerCtr::run()
 		if (audioFrame != nullptr) {
 			//如果frame_pts <= d_time , 这帧音频应该立即播放出来
 			if (audioFrame->GetPts() <= dTime) {
-				printf("Audio Frame\n");
+				//printf("Audio Frame\n");
 				delete audioFrame;
 				audioFrame = nullptr;
 			}
